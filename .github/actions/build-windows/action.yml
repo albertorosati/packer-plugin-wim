@@ -65,7 +65,7 @@ runs:
         Remove-item -Path ./out/* -Recurse -Exclude *.zip
     
     - name: "Upload the archive"
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.artifactName }}
         path: ./out/*
