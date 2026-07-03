@@ -56,17 +56,20 @@ runs:
         go get .
         go build -x -o ./out/packer-plugin-wim_windows_${{ inputs.GOARCH }}.exe .
 
-    - name: "Copy MinGW runtime DLLs"
+    - name: "Copy DLL dependencies of libwim-15.dll"
       shell: powershell
       run: |
-        # Bundle MinGW runtime DLLs so the plugin runs on machines without MinGW installed.
-        # These are only needed when static linking (-static-libgcc etc.) does not fully
-        # eliminate the dependency (e.g. indirect DLL requirements from wimlib).
-        $mingwBin = "C:\msys64\mingw64\bin"
-        @('libgcc_s_seh-1.dll', 'libstdc++-6.dll', 'libwinpthread-1.dll') | ForEach-Object {
-          $src = Join-Path $mingwBin $_
-          if (Test-Path $src) { Copy-Item $src ./out/ }
-        }
+        # Use MSYS2 ldd to discover the actual MinGW runtime DLLs that libwim-15.dll
+        # depends on and copy them into ./out/ so they are bundled in the release zip.
+        # Writing the script to a file avoids PowerShell/awk quoting conflicts.
+        $sh = @'
+        ldd ./out/libwim-15.dll | grep -i /mingw | awk '{print $3}' | while read d; do
+          echo "Copying $d"
+          cp "$d" ./out/ || true
+        done
+        '@
+        $sh | Out-File -FilePath './bundle_deps.sh' -Encoding ascii
+        msys2 -c 'sh ./bundle_deps.sh'
 
     - if: inputs.VERSION != ''
       shell: powershell
