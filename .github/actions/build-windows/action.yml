@@ -50,13 +50,25 @@ runs:
         go get .
         go build -x -o ./out/packer-plugin-wim_windows_${{ inputs.GOARCH }}.exe .
 
+    - name: "Copy MinGW runtime DLLs"
+      shell: powershell
+      run: |
+        # Bundle MinGW runtime DLLs so the plugin runs on machines without MinGW installed.
+        # These are only needed when static linking (-static-libgcc etc.) does not fully
+        # eliminate the dependency (e.g. indirect DLL requirements from wimlib).
+        $mingwBin = "C:\msys64\mingw64\bin"
+        @('libgcc_s_seh-1.dll', 'libstdc++-6.dll', 'libwinpthread-1.dll') | ForEach-Object {
+          $src = Join-Path $mingwBin $_
+          if (Test-Path $src) { Copy-Item $src ./out/ }
+        }
+
     - if: startsWith(github.ref, 'refs/tags/v') == true
       shell: powershell
-      run: Add-Content -Value "artifactName=packer-plugin-wim_${{ github.ref_name }}_windows_${{ inputs.GOARCH }}" -Path "$env:GITHUB_ENV"
+      run: Add-Content -Value "artifactName=packer-plugin-wim_${{ github.ref_name }}_x5.0_windows_${{ inputs.GOARCH }}" -Path "$env:GITHUB_ENV"
 
     - if: startsWith(github.ref, 'refs/tags/v') != true
       shell: powershell
-      run: Add-Content -Value "artifactName=packer-plugin-wim_windows_${{ inputs.GOARCH }}" -Path "$env:GITHUB_ENV"
+      run: Add-Content -Value "artifactName=packer-plugin-wim_x5.0_windows_${{ inputs.GOARCH }}" -Path "$env:GITHUB_ENV"
 
     - name: "Create Archive"
       shell: powershell
@@ -68,5 +80,5 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.artifactName }}
-        path: ./out/*
+        path: ./out/${{ env.artifactName }}.zip
         retention-days: 15

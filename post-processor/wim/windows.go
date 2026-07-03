@@ -1,7 +1,7 @@
 package wim
 
 /*
-#cgo LDFLAGS: -L../../.lib/devel -llibwim -Wl,-rpath=../../.lib/devel
+#cgo LDFLAGS: -L../../.lib/devel -llibwim -static-libgcc -static-libstdc++ -Wl,-Bstatic,-lpthread,-Bdynamic
 #include "../../.lib/devel/wimlib.h"
 #include <stdlib.h>
 */

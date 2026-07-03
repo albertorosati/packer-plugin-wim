@@ -14,8 +14,8 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-	"github.com/powa458/packer-plugin-wim/post-processor/utils"
-	"github.com/powa458/packer-plugin-wim/post-processor/wim"
+	"github.com/7ep3s/packer-plugin-wim/post-processor/utils"
+	"github.com/7ep3s/packer-plugin-wim/post-processor/wim"
 )
 
 const (

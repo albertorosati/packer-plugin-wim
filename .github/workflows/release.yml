@@ -28,10 +28,19 @@ jobs:
         shell: bash
         run: ls -la artifacts
 
+      - name: Generate SHA256SUMS
+        shell: bash
+        run: |
+          VERSION="${{ github.ref_name }}"
+          find artifacts -name '*.zip' | sort | while read f; do
+            sha256sum "$f" | awk -v fname="$(basename $f)" '{print $1 "  " fname}'
+          done > "packer-plugin-wim_${VERSION}_SHA256SUMS"
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             artifacts/*/*
+            packer-plugin-wim_${{ github.ref_name }}_SHA256SUMS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

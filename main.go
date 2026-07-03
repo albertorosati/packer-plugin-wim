@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 	v "github.com/hashicorp/packer-plugin-sdk/version"
-	create "github.com/powa458/packer-plugin-wim/post-processor/create"
+	create "github.com/7ep3s/packer-plugin-wim/post-processor/create"
 )
 
 func main() {

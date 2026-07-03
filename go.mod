@@ -1,4 +1,4 @@
-module github.com/powa458/packer-plugin-wim
+module github.com/7ep3s/packer-plugin-wim
 
 go 1.17
 
