@@ -45,6 +45,8 @@ runs:
     
     - name: "Build plugin binary"
       shell: powershell
+      env:
+        CGO_LDFLAGS_ALLOW: "-Wl,-Bstatic,-lpthread,-Bdynamic"
       run: |
         $env:GOARCH = "${{ inputs.GOARCH }}"
         go get .
