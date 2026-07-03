@@ -9,10 +9,17 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version tag (e.g. v1.0.0)'
+        required: true
+        type: string
 
 jobs:
   build:
     uses: "./.github/workflows/build.yml"
+    with:
+      version: ${{ inputs.version || github.ref_name }}
 
   release:
     runs-on: ubuntu-latest
@@ -23,15 +30,25 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: artifacts
-          
+
       - name: List artifacts
         shell: bash
         run: ls -la artifacts
 
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [[ -z "$VERSION" ]]; then
+            VERSION="${{ github.ref_name }}"
+          fi
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Generate SHA256SUMS
         shell: bash
         run: |
-          VERSION="${{ github.ref_name }}"
+          VERSION="${{ steps.version.outputs.value }}"
           find artifacts -name '*.zip' | sort | while read f; do
             sha256sum "$f" | awk -v fname="$(basename $f)" '{print $1 "  " fname}'
           done > "packer-plugin-wim_${VERSION}_SHA256SUMS"
@@ -39,8 +56,9 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.version.outputs.value }}
           files: |
             artifacts/*/*
-            packer-plugin-wim_${{ github.ref_name }}_SHA256SUMS
+            packer-plugin-wim_${{ steps.version.outputs.value }}_SHA256SUMS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
